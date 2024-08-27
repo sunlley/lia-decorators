@@ -1,6 +1,8 @@
 import '../dist';
-test('My Common', () => {
-  // console.log(result);
+import {describe, expect, test} from '@jest/globals';
+
+test('decorators', () => {
   // expect('Hello Carl'.contains('Hello')).toBe(true);
-  // expect(String.DATE().getDate()).toBeInstanceOf(Date);
+  expect('Hello Lia').toMatch('Lia');
 });
+// console.log('decorators test');
