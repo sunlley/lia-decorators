@@ -4,7 +4,8 @@ import { AssertParams, MethodLog } from '../dist';
 class ClassA {
 
   @MethodLog({formater:(...args)=>{return ''},showEnd:true})
-  @AssertParams(['abc',['name','string','tom'],['age','number',(value:any)=>{
+  @AssertParams(['abc',['name','string','tom'],['age','number',(value:any,params:any)=>{
+    console.log(value,params);
     if (value==12){
       return 200
     }

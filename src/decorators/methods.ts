@@ -6,7 +6,7 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
  */
 export type AssertParamsType1 = string | `${string}|${string}`;
 export type AssertParamsType2 = 'string' | 'number' | 'boolean' | 'object';
-export type AssertParamsType2_1 = string | number | boolean | object | ((value: any) => any);
+export type AssertParamsType2_1 = string | number | boolean | object | ((value: any,params:any) => any);
 /**
  * exp1:string[]
  * [ 'name', 'age' ]
@@ -117,7 +117,7 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
     if (!Object.hasOwn(params, hasKeyName)) {
       if (defaultValue_) {
         if (typeof defaultValue_ =='function'){
-          defaultValue_ = defaultValue_(params);
+          defaultValue_ = defaultValue_(params[hasKeyName],params);
         }
         if (typeof defaultValue_ != type_) {
           throw new Error(`params.${hasKeyName}'s default value type is not ${type_}`);
@@ -133,7 +133,7 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
     } else {
       if (defaultValue_){
         if (typeof defaultValue_ =='function'){
-          params[hasKeyName] = defaultValue_(params[hasKeyName]);
+          params[hasKeyName] = defaultValue_(params[hasKeyName],params);
         }
       }
       if (type_ != typeof params[hasKeyName]) {
