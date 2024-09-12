@@ -42,38 +42,41 @@ export function CallLog(target: any, propertyName: string, propertyDescriptor: P
   };
   return propertyDescriptor;
 }
-const create_method_log = (options?:{
-  formater?:(...args:any[])=>any
-  tag?:string,
-  showTime?:boolean,
-  showEnd?:boolean,
+
+const create_method_log = (options?: {
+  formater?: (...args: any[]) => any;
+  tag?: string;
+  showTime?: boolean;
+  showEnd?: boolean;
 }) => {
   return (target: object, name: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     let formater = options?.formater;
     let tag = options?.tag;
-    let showTime = options?.showTime??true;
-    let showEnd = options?.showEnd??false;
+    let showTime = options?.showTime ?? true;
+    let showEnd = options?.showEnd ?? false;
     const method = descriptor.value;
     descriptor.value = function (...args: any[]) {
       let startTime = Date.now();
-      const args_:any[]=[];
-      if (tag){args_.push(tag);}
-      if (showTime){
-        args_.push(new Date().toLocaleString())
+      const args_: any[] = [];
+      if (tag) {
+        args_.push(tag);
       }
-      args_.push(`${target.constructor.name}'${name}`)
-      if (formater){
-        let message=formater(...args);
-        args_.push(message)
-      }else {
-        if (args){
-          args_.push(JSON.stringify(args))
+      if (showTime) {
+        args_.push(new Date().toLocaleString());
+      }
+      args_.push(`${target.constructor.name}'${name}`);
+      if (formater) {
+        let message = formater(...args);
+        args_.push(message);
+      } else {
+        if (args) {
+          args_.push(JSON.stringify(args));
         }
       }
       console.log(...args_);
       const result = method.apply(this, args);
-      console.log(...(args_.slice(0, args_.length-1)),'Done',`UseTime:${Date.now()-startTime}ms`);
-      return result
+      console.log(...args_.slice(0, args_.length - 1), 'Done', `UseTime:${Date.now() - startTime}ms`);
+      return result;
     };
     return descriptor;
   };
@@ -143,6 +146,7 @@ function create_assert_params(
     validator?: string | ((value: any, keys: AssertParamsType[]) => void);
     paramsIndex?: number;
     useDefault?: boolean;
+    catcher?: (error: Error|any) => void;
   },
 ) {
   return (target: object, name: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -151,25 +155,33 @@ function create_assert_params(
     // console.log('create_assert_params', 'descriptor', descriptor);
     const method = descriptor.value;
     descriptor.value = function (...args: any[]) {
-      let { validator, paramsIndex, useDefault } = options ?? {};
+      let { validator, paramsIndex, useDefault, catcher } = options ?? {};
       paramsIndex = paramsIndex ?? 0;
       useDefault = useDefault ?? false;
       const params = args[paramsIndex];
-      if (validator) {
-        if (typeof validator === 'function') {
-          validator(params, keys);
-        } else {
-          let hasOwn = Object.hasOwn(target, validator);
-          if (hasOwn) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            target[assertFunction](params, keys);
+      try {
+        if (validator) {
+          if (typeof validator === 'function') {
+            validator(params, keys);
           } else {
-            throw new Error(`${target.constructor.name} has no property ${validator}`);
+            let hasOwn = Object.hasOwn(target, validator);
+            if (hasOwn) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              target[assertFunction](params, keys);
+            } else {
+              throw new Error(`${target.constructor.name} has no property ${validator}`);
+            }
           }
+        } else {
+          defaultAssertParams(params, keys, useDefault);
         }
-      } else {
-        defaultAssertParams(params, keys, useDefault);
+      } catch (e:any) {
+        if (catcher){
+          catcher(e);
+        }else {
+          throw e;
+        }
       }
       return method.apply(this, args);
     };
