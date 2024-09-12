@@ -6,7 +6,7 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
  */
 export type AssertParamsType1 = string | `${string}|${string}`;
 export type AssertParamsType2 = 'string' | 'number' | 'boolean' | 'object';
-export type AssertParamsType2_1 = string | number | boolean | object;
+export type AssertParamsType2_1 = string | number | boolean | object | ((value: any) => any);
 /**
  * exp1:string[]
  * [ 'name', 'age' ]
@@ -116,6 +116,9 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
     }
     if (!Object.hasOwn(params, hasKeyName)) {
       if (defaultValue_) {
+        if (typeof defaultValue_ =='function'){
+          defaultValue_ = defaultValue_(params);
+        }
         if (typeof defaultValue_ != type_) {
           throw new Error(`params.${hasKeyName}'s default value type is not ${type_}`);
         } else {
@@ -128,6 +131,11 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
         throw new Error(`params.${hasKeyName} is not exist`);
       }
     } else {
+      if (defaultValue_){
+        if (typeof defaultValue_ =='function'){
+          params[hasKeyName] = defaultValue_(params[hasKeyName]);
+        }
+      }
       if (type_ != typeof params[hasKeyName]) {
         throw new Error(`params.${hasKeyName} type is not ${type_}`);
       }
@@ -146,7 +154,7 @@ function create_assert_params(
     validator?: string | ((value: any, keys: AssertParamsType[]) => void);
     paramsIndex?: number;
     useDefault?: boolean;
-    catcher?: (error: Error|any) => void;
+    catcher?: (error: Error | any) => void;
   },
 ) {
   return (target: object, name: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -176,10 +184,10 @@ function create_assert_params(
         } else {
           defaultAssertParams(params, keys, useDefault);
         }
-      } catch (e:any) {
-        if (catcher){
+      } catch (e: any) {
+        if (catcher) {
           catcher(e);
-        }else {
+        } else {
           throw e;
         }
       }
