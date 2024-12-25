@@ -88,6 +88,12 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
     if (!Object.hasOwn(params, key)) {
       throw new Error(`params.${key} is not exist`);
     }
+    let value = params[key];
+    if (typeof value =='string') {
+      if (value.trim().length==0){
+        throw new Error(`params.${key} is illegal`);
+      }
+    }
   } else if (Array.isArray(key)) {
     // console.log('defaultAssertKey', 'array', key);
     let hasKeyName = '';
@@ -134,6 +140,13 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
       if (defaultValue_){
         if (typeof defaultValue_ =='function'){
           params[hasKeyName] = defaultValue_(params[hasKeyName],params);
+        }
+      }else {
+        let value =  params[hasKeyName];
+        if (typeof value =='string'){
+          if (value.trim().length==0){
+            throw new Error(`params.${hasKeyName} is illegal`);
+          }
         }
       }
       if (type_ != typeof params[hasKeyName]) {
