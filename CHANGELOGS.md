@@ -1,5 +1,7 @@
 # CHANGELOG
 
+### 1.0.6
+[√] export AssetsParams's defaultValue function, defaultAssertParams
 ### 1.0.4
 [√] upgrade AssetsParams's defaultValue function
 ### 1.0.3

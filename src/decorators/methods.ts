@@ -82,7 +82,7 @@ const create_method_log = (options?: {
   };
 };
 
-const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolean) => {
+export const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolean) => {
   if (typeof key === 'string') {
     key = key.trim();
     if (!Object.hasOwn(params, key)) {
@@ -155,7 +155,7 @@ const defaultAssertKey = (params: any, key: AssertParamsType, useDefault: boolea
     }
   }
 };
-const defaultAssertParams = (params: any, keys: AssertParamsType[], useDefault: boolean) => {
+export const defaultAssertParams = (params: any, keys: AssertParamsType[], useDefault: boolean) => {
   for (const key of keys) {
     defaultAssertKey(params, key, useDefault);
   }
